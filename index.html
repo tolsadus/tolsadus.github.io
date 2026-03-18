@@ -30,6 +30,14 @@
             z-index: 0;
         }
 
+        canvas#cursor-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            pointer-events: none;
+        }
+
         .vignette {
             position: fixed;
             top: 0;
@@ -207,6 +215,7 @@
 </head>
 <body>
     <canvas id="starfield"></canvas>
+    <canvas id="cursor-layer"></canvas>
     <div class="vignette"></div>
 
     <div class="container">
@@ -235,12 +244,14 @@
     <script>
         const canvas = document.getElementById('starfield');
         const ctx = canvas.getContext('2d');
+        const cursorCanvas = document.getElementById('cursor-layer');
+        const cctx = cursorCanvas.getContext('2d');
 
         let w, h, stars, shootingStars;
 
         function init() {
-            w = canvas.width = window.innerWidth;
-            h = canvas.height = window.innerHeight;
+            w = canvas.width = cursorCanvas.width = window.innerWidth;
+            h = canvas.height = cursorCanvas.height = window.innerHeight;
 
             stars = Array.from({ length: 300 }, () => ({
                 x: Math.random() * w,
@@ -320,36 +331,64 @@
                 }
 
                 // Glow
-                ctx.beginPath();
-                ctx.arc(sp.x, sp.y, sp.size * 2, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(${sp.hue}, ${sp.life * 0.15})`;
-                ctx.fill();
+                cctx.beginPath();
+                cctx.arc(sp.x, sp.y, sp.size * 2, 0, Math.PI * 2);
+                cctx.fillStyle = `rgba(${sp.hue}, ${sp.life * 0.15})`;
+                cctx.fill();
 
                 // Core
-                ctx.beginPath();
-                ctx.arc(sp.x, sp.y, sp.size * sp.life, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(${sp.hue}, ${sp.life * 0.8})`;
-                ctx.fill();
+                cctx.beginPath();
+                cctx.arc(sp.x, sp.y, sp.size * sp.life, 0, Math.PI * 2);
+                cctx.fillStyle = `rgba(${sp.hue}, ${sp.life * 0.8})`;
+                cctx.fill();
 
                 // Tiny cross flare
-                ctx.strokeStyle = `rgba(${sp.hue}, ${sp.life * 0.4})`;
-                ctx.lineWidth = 0.4;
+                cctx.strokeStyle = `rgba(${sp.hue}, ${sp.life * 0.4})`;
+                cctx.lineWidth = 0.4;
                 const fl = sp.size * 3 * sp.life;
-                ctx.beginPath();
-                ctx.moveTo(sp.x - fl, sp.y);
-                ctx.lineTo(sp.x + fl, sp.y);
-                ctx.moveTo(sp.x, sp.y - fl);
-                ctx.lineTo(sp.x, sp.y + fl);
-                ctx.stroke();
+                cctx.beginPath();
+                cctx.moveTo(sp.x - fl, sp.y);
+                cctx.lineTo(sp.x + fl, sp.y);
+                cctx.moveTo(sp.x, sp.y - fl);
+                cctx.lineTo(sp.x, sp.y + fl);
+                cctx.stroke();
             }
         }
 
         let sparkleThrottle = 0;
 
+        function getCursorColor() {
+            const ring = document.querySelector('.signal-ring');
+            if (!ring) return { r: 200, g: 60, b: 60, t: 0 };
+            const rect = ring.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const dist = Math.hypot(cursor.x - cx, cursor.y - cy);
+            const maxDist = Math.max(w, h) * 0.5;
+            const t = Math.max(0, Math.min(1, 1 - dist / maxDist)); // 1 = center, 0 = far
+            // Interpolate: red(200,60,60) -> blue(80,200,255) -> white(220,230,255)
+            let r, g, b;
+            if (t < 0.5) {
+                const p = t / 0.5;
+                r = 200 + (80 - 200) * p;
+                g = 60 + (200 - 60) * p;
+                b = 60 + (255 - 60) * p;
+            } else {
+                const p = (t - 0.5) / 0.5;
+                r = 80 + (220 - 80) * p;
+                g = 200 + (230 - 200) * p;
+                b = 255;
+            }
+            return { r: Math.round(r), g: Math.round(g), b: Math.round(b), t };
+        }
+
         function drawCursorStar() {
             // Smooth follow
             cursor.x += (mouse.x - cursor.x) * 0.12;
             cursor.y += (mouse.y - cursor.y) * 0.12;
+
+            const col = getCursorColor();
+            const rgb = `${col.r}, ${col.g}, ${col.b}`;
 
             // Trail
             trail.push({ x: cursor.x, y: cursor.y });
@@ -360,10 +399,10 @@
                 const progress = i / trail.length;
                 const r = progress * 2;
                 const alpha = progress * 0.3;
-                ctx.beginPath();
-                ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(80, 200, 255, ${alpha})`;
-                ctx.fill();
+                cctx.beginPath();
+                cctx.arc(t.x, t.y, r, 0, Math.PI * 2);
+                cctx.fillStyle = `rgba(${rgb}, ${alpha})`;
+                cctx.fill();
             }
 
             // Main cursor star
@@ -371,33 +410,33 @@
             const glow = 3 + Math.sin(Date.now() * 0.005) * 1.5;
 
             // Outer glow
-            ctx.beginPath();
-            ctx.arc(cursor.x, cursor.y, size + glow, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(80, 200, 255, 0.08)';
-            ctx.fill();
+            cctx.beginPath();
+            cctx.arc(cursor.x, cursor.y, size + glow, 0, Math.PI * 2);
+            cctx.fillStyle = `rgba(${rgb}, 0.08)`;
+            cctx.fill();
 
             // Inner glow
-            ctx.beginPath();
-            ctx.arc(cursor.x, cursor.y, size, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(80, 200, 255, 0.3)';
-            ctx.fill();
+            cctx.beginPath();
+            cctx.arc(cursor.x, cursor.y, size, 0, Math.PI * 2);
+            cctx.fillStyle = `rgba(${rgb}, 0.3)`;
+            cctx.fill();
 
             // Core
-            ctx.beginPath();
-            ctx.arc(cursor.x, cursor.y, 1.5, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(220, 230, 255, 0.9)';
-            ctx.fill();
+            cctx.beginPath();
+            cctx.arc(cursor.x, cursor.y, 1.5, 0, Math.PI * 2);
+            cctx.fillStyle = `rgba(${Math.min(col.r + 40, 255)}, ${Math.min(col.g + 30, 255)}, 255, 0.9)`;
+            cctx.fill();
 
             // Cross flare
-            ctx.strokeStyle = `rgba(80, 200, 255, ${0.15 + Math.sin(Date.now() * 0.003) * 0.1})`;
-            ctx.lineWidth = 0.5;
+            cctx.strokeStyle = `rgba(${rgb}, ${0.15 + Math.sin(Date.now() * 0.003) * 0.1})`;
+            cctx.lineWidth = 0.5;
             const flareLen = size + glow + 6;
-            ctx.beginPath();
-            ctx.moveTo(cursor.x - flareLen, cursor.y);
-            ctx.lineTo(cursor.x + flareLen, cursor.y);
-            ctx.moveTo(cursor.x, cursor.y - flareLen);
-            ctx.lineTo(cursor.x, cursor.y + flareLen);
-            ctx.stroke();
+            cctx.beginPath();
+            cctx.moveTo(cursor.x - flareLen, cursor.y);
+            cctx.lineTo(cursor.x + flareLen, cursor.y);
+            cctx.moveTo(cursor.x, cursor.y - flareLen);
+            cctx.lineTo(cursor.x, cursor.y + flareLen);
+            cctx.stroke();
 
             // Check collision with signal ring center
             const ring = document.querySelector('.signal-ring');
@@ -417,6 +456,7 @@
 
         function drawLoop() {
             ctx.clearRect(0, 0, w, h);
+            cctx.clearRect(0, 0, w, h);
 
             // Nebula glow
             const grd = ctx.createRadialGradient(w * 0.3, h * 0.4, 0, w * 0.3, h * 0.4, w * 0.5);
