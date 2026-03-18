@@ -286,6 +286,66 @@
             }
         });
 
+        // Sparkle particles
+        const sparkles = [];
+
+        function spawnSparkles(x, y) {
+            for (let i = 0; i < 8; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 3 + 1.5;
+                sparkles.push({
+                    x, y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    life: 1,
+                    decay: Math.random() * 0.03 + 0.015,
+                    size: Math.random() * 2.5 + 1,
+                    hue: Math.random() > 0.5 ? '80, 200, 255' : '167, 139, 250'
+                });
+            }
+        }
+
+        function drawSparkles() {
+            for (let i = sparkles.length - 1; i >= 0; i--) {
+                const sp = sparkles[i];
+                sp.x += sp.vx;
+                sp.y += sp.vy;
+                sp.vx *= 0.96;
+                sp.vy *= 0.96;
+                sp.life -= sp.decay;
+
+                if (sp.life <= 0) {
+                    sparkles.splice(i, 1);
+                    continue;
+                }
+
+                // Glow
+                ctx.beginPath();
+                ctx.arc(sp.x, sp.y, sp.size * 2, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${sp.hue}, ${sp.life * 0.15})`;
+                ctx.fill();
+
+                // Core
+                ctx.beginPath();
+                ctx.arc(sp.x, sp.y, sp.size * sp.life, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${sp.hue}, ${sp.life * 0.8})`;
+                ctx.fill();
+
+                // Tiny cross flare
+                ctx.strokeStyle = `rgba(${sp.hue}, ${sp.life * 0.4})`;
+                ctx.lineWidth = 0.4;
+                const fl = sp.size * 3 * sp.life;
+                ctx.beginPath();
+                ctx.moveTo(sp.x - fl, sp.y);
+                ctx.lineTo(sp.x + fl, sp.y);
+                ctx.moveTo(sp.x, sp.y - fl);
+                ctx.lineTo(sp.x, sp.y + fl);
+                ctx.stroke();
+            }
+        }
+
+        let sparkleThrottle = 0;
+
         function drawCursorStar() {
             // Smooth follow
             cursor.x += (mouse.x - cursor.x) * 0.12;
@@ -338,6 +398,21 @@
             ctx.moveTo(cursor.x, cursor.y - flareLen);
             ctx.lineTo(cursor.x, cursor.y + flareLen);
             ctx.stroke();
+
+            // Check collision with signal ring center
+            const ring = document.querySelector('.signal-ring');
+            if (ring) {
+                const rect = ring.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                const dist = Math.hypot(cursor.x - cx, cursor.y - cy);
+                if (dist < 90) {
+                    sparkleThrottle++;
+                    if (sparkleThrottle % 3 === 0) {
+                        spawnSparkles(cursor.x, cursor.y);
+                    }
+                }
+            }
         }
 
         function drawLoop() {
@@ -396,6 +471,7 @@
             }
 
             if (mouseActive) drawCursorStar();
+            drawSparkles();
             requestAnimationFrame(drawLoop);
         }
 
