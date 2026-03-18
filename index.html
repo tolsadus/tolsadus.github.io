@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>tolsadus</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%230a0a12'/><circle cx='50' cy='50' r='8' fill='%2350c8ff'/><circle cx='50' cy='50' r='16' fill='none' stroke='%2350c8ff' stroke-width='1.5' opacity='0.5'/><circle cx='50' cy='50' r='28' fill='none' stroke='%2350c8ff' stroke-width='1' opacity='0.25'/><line x1='50' y1='30' x2='50' y2='70' stroke='%2350c8ff' stroke-width='0.8' opacity='0.4'/><line x1='30' y1='50' x2='70' y2='50' stroke='%2350c8ff' stroke-width='0.8' opacity='0.4'/></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -266,7 +267,74 @@
             }
         }
 
-        function draw() {
+
+
+        // Cursor star follower
+        let mouse = { x: w / 2, y: h / 2 };
+        let cursor = { x: w / 2, y: h / 2 };
+        const trail = [];
+        const trailLen = 12;
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        function drawCursorStar() {
+            // Smooth follow
+            cursor.x += (mouse.x - cursor.x) * 0.12;
+            cursor.y += (mouse.y - cursor.y) * 0.12;
+
+            // Trail
+            trail.push({ x: cursor.x, y: cursor.y });
+            if (trail.length > trailLen) trail.shift();
+
+            for (let i = 0; i < trail.length; i++) {
+                const t = trail[i];
+                const progress = i / trail.length;
+                const r = progress * 2;
+                const alpha = progress * 0.3;
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(80, 200, 255, ${alpha})`;
+                ctx.fill();
+            }
+
+            // Main cursor star
+            const size = 4;
+            const glow = 3 + Math.sin(Date.now() * 0.005) * 1.5;
+
+            // Outer glow
+            ctx.beginPath();
+            ctx.arc(cursor.x, cursor.y, size + glow, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(80, 200, 255, 0.08)';
+            ctx.fill();
+
+            // Inner glow
+            ctx.beginPath();
+            ctx.arc(cursor.x, cursor.y, size, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(80, 200, 255, 0.3)';
+            ctx.fill();
+
+            // Core
+            ctx.beginPath();
+            ctx.arc(cursor.x, cursor.y, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(220, 230, 255, 0.9)';
+            ctx.fill();
+
+            // Cross flare
+            ctx.strokeStyle = `rgba(80, 200, 255, ${0.15 + Math.sin(Date.now() * 0.003) * 0.1})`;
+            ctx.lineWidth = 0.5;
+            const flareLen = size + glow + 6;
+            ctx.beginPath();
+            ctx.moveTo(cursor.x - flareLen, cursor.y);
+            ctx.lineTo(cursor.x + flareLen, cursor.y);
+            ctx.moveTo(cursor.x, cursor.y - flareLen);
+            ctx.lineTo(cursor.x, cursor.y + flareLen);
+            ctx.stroke();
+        }
+
+        function drawLoop() {
             ctx.clearRect(0, 0, w, h);
 
             // Nebula glow
@@ -282,7 +350,6 @@
             ctx.fillStyle = grd2;
             ctx.fillRect(0, 0, w, h);
 
-            // Stars
             for (const s of stars) {
                 s.flicker += s.flickerSpeed;
                 const opacity = 0.4 + Math.sin(s.flicker) * 0.3;
@@ -290,54 +357,44 @@
                 ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(220, 225, 240, ${opacity})`;
                 ctx.fill();
-
-                // Subtle glow on bigger stars
                 if (s.r > 1.2) {
                     ctx.beginPath();
                     ctx.arc(s.x, s.y, s.r * 3, 0, Math.PI * 2);
                     ctx.fillStyle = `rgba(80, 200, 255, ${opacity * 0.1})`;
                     ctx.fill();
                 }
-
                 s.y += s.speed;
-                if (s.y > h + 5) {
-                    s.y = -5;
-                    s.x = Math.random() * w;
-                }
+                if (s.y > h + 5) { s.y = -5; s.x = Math.random() * w; }
             }
 
-            // Shooting stars
             spawnShootingStar();
             for (let i = shootingStars.length - 1; i >= 0; i--) {
                 const ss = shootingStars[i];
                 const endX = ss.x - Math.cos(ss.angle) * ss.len;
                 const endY = ss.y - Math.sin(ss.angle) * ss.len;
-
                 const grad = ctx.createLinearGradient(ss.x, ss.y, endX, endY);
                 grad.addColorStop(0, `rgba(200, 220, 255, ${ss.opacity})`);
                 grad.addColorStop(1, 'transparent');
-
                 ctx.beginPath();
                 ctx.moveTo(ss.x, ss.y);
                 ctx.lineTo(endX, endY);
                 ctx.strokeStyle = grad;
                 ctx.lineWidth = 1.5;
                 ctx.stroke();
-
                 ss.x += Math.cos(ss.angle) * ss.speed;
                 ss.y += Math.sin(ss.angle) * ss.speed;
                 ss.opacity -= 0.008;
-
                 if (ss.opacity <= 0 || ss.x > w + 100 || ss.y > h + 100) {
                     shootingStars.splice(i, 1);
                 }
             }
 
-            requestAnimationFrame(draw);
+            drawCursorStar();
+            requestAnimationFrame(drawLoop);
         }
 
         init();
-        draw();
+        drawLoop();
         window.addEventListener('resize', init);
     </script>
 </body>
