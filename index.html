@@ -284,7 +284,7 @@
         let mouse = { x: 0, y: 0 };
         let cursor = { x: 0, y: 0 };
         const trail = [];
-        const trailLen = 12;
+        const trailLen = 25;
         let mouseActive = false;
 
         window.addEventListener('mousemove', (e) => {
@@ -301,16 +301,16 @@
         const sparkles = [];
 
         function spawnSparkles(x, y) {
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < 12; i++) {
                 const angle = Math.random() * Math.PI * 2;
-                const speed = Math.random() * 3 + 1.5;
+                const speed = Math.random() * 4 + 2;
                 sparkles.push({
                     x, y,
                     vx: Math.cos(angle) * speed,
                     vy: Math.sin(angle) * speed,
                     life: 1,
-                    decay: Math.random() * 0.03 + 0.015,
-                    size: Math.random() * 2.5 + 1,
+                    decay: Math.random() * 0.02 + 0.01,
+                    size: Math.random() * 4 + 2,
                     hue: Math.random() > 0.5 ? '80, 200, 255' : '167, 139, 250'
                 });
             }
@@ -364,7 +364,7 @@
             const cx = rect.left + rect.width / 2;
             const cy = rect.top + rect.height / 2;
             const dist = Math.hypot(cursor.x - cx, cursor.y - cy);
-            const maxDist = Math.max(w, h) * 0.5;
+            const maxDist = Math.max(w, h) * 0.35;
             const t = Math.max(0, Math.min(1, 1 - dist / maxDist)); // 1 = center, 0 = far
             // Interpolate: red(200,60,60) -> blue(80,200,255) -> white(220,230,255)
             let r, g, b;
@@ -397,8 +397,8 @@
             for (let i = 0; i < trail.length; i++) {
                 const t = trail[i];
                 const progress = i / trail.length;
-                const r = progress * 2;
-                const alpha = progress * 0.3;
+                const r = progress * 3.5;
+                const alpha = progress * 0.6;
                 cctx.beginPath();
                 cctx.arc(t.x, t.y, r, 0, Math.PI * 2);
                 cctx.fillStyle = `rgba(${rgb}, ${alpha})`;
@@ -406,31 +406,37 @@
             }
 
             // Main cursor star
-            const size = 4;
-            const glow = 3 + Math.sin(Date.now() * 0.005) * 1.5;
+            const size = 6;
+            const glow = 8 + Math.sin(Date.now() * 0.005) * 3;
+
+            // Large outer glow
+            cctx.beginPath();
+            cctx.arc(cursor.x, cursor.y, size + glow + 10, 0, Math.PI * 2);
+            cctx.fillStyle = `rgba(${rgb}, 0.06)`;
+            cctx.fill();
 
             // Outer glow
             cctx.beginPath();
             cctx.arc(cursor.x, cursor.y, size + glow, 0, Math.PI * 2);
-            cctx.fillStyle = `rgba(${rgb}, 0.08)`;
+            cctx.fillStyle = `rgba(${rgb}, 0.15)`;
             cctx.fill();
 
             // Inner glow
             cctx.beginPath();
             cctx.arc(cursor.x, cursor.y, size, 0, Math.PI * 2);
-            cctx.fillStyle = `rgba(${rgb}, 0.3)`;
+            cctx.fillStyle = `rgba(${rgb}, 0.6)`;
             cctx.fill();
 
             // Core
             cctx.beginPath();
-            cctx.arc(cursor.x, cursor.y, 1.5, 0, Math.PI * 2);
-            cctx.fillStyle = `rgba(${Math.min(col.r + 40, 255)}, ${Math.min(col.g + 30, 255)}, 255, 0.9)`;
+            cctx.arc(cursor.x, cursor.y, 3, 0, Math.PI * 2);
+            cctx.fillStyle = `rgba(${Math.min(col.r + 40, 255)}, ${Math.min(col.g + 30, 255)}, 255, 1)`;
             cctx.fill();
 
             // Cross flare
-            cctx.strokeStyle = `rgba(${rgb}, ${0.15 + Math.sin(Date.now() * 0.003) * 0.1})`;
-            cctx.lineWidth = 0.5;
-            const flareLen = size + glow + 6;
+            cctx.strokeStyle = `rgba(${rgb}, ${0.3 + Math.sin(Date.now() * 0.003) * 0.15})`;
+            cctx.lineWidth = 1;
+            const flareLen = size + glow + 15;
             cctx.beginPath();
             cctx.moveTo(cursor.x - flareLen, cursor.y);
             cctx.lineTo(cursor.x + flareLen, cursor.y);
