@@ -474,29 +474,9 @@
                 if (dist < 100) {
                     ring.classList.add('active');
                     sparkleThrottle++;
-                    if (sparkleThrottle % 2 === 0) {
+                    if (sparkleThrottle % 3 === 0) {
                         spawnSparkles(cursor.x, cursor.y);
-                        // Also spawn sparkles around the ring edge
-                        const a = Math.random() * Math.PI * 2;
-                        spawnSparkles(cx + Math.cos(a) * 90, cy + Math.sin(a) * 90);
                     }
-                    // Draw a bright connection line between cursor and ring center
-                    cctx.strokeStyle = `rgba(80, 200, 255, ${0.2 + Math.sin(Date.now() * 0.008) * 0.1})`;
-                    cctx.lineWidth = 1;
-                    cctx.beginPath();
-                    cctx.moveTo(cursor.x, cursor.y);
-                    cctx.lineTo(cx, cy);
-                    cctx.stroke();
-                    // Draw a bright flash at the ring center
-                    const flashSize = 20 + Math.sin(Date.now() * 0.01) * 8;
-                    cctx.beginPath();
-                    cctx.arc(cx, cy, flashSize, 0, Math.PI * 2);
-                    cctx.fillStyle = `rgba(80, 200, 255, 0.08)`;
-                    cctx.fill();
-                    cctx.beginPath();
-                    cctx.arc(cx, cy, flashSize * 0.4, 0, Math.PI * 2);
-                    cctx.fillStyle = `rgba(167, 139, 250, 0.12)`;
-                    cctx.fill();
                 } else {
                     ring.classList.remove('active');
                 }
