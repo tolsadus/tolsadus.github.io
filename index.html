@@ -65,7 +65,7 @@
             width: 180px;
             height: 180px;
             border-radius: 50%;
-            border: 2px solid rgba(80, 200, 255, 0.3);
+            border: 2px solid rgba(30, 80, 160, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -79,7 +79,7 @@
             content: '';
             position: absolute;
             border-radius: 50%;
-            border: 1px solid rgba(80, 200, 255, 0.15);
+            border: 1px solid rgba(30, 80, 160, 0.15);
         }
 
         .signal-ring::before {
@@ -97,30 +97,30 @@
         .signal-core {
             width: 12px;
             height: 12px;
-            background: #50c8ff;
+            background: #1e50a0;
             border-radius: 50%;
-            box-shadow: 0 0 20px #50c8ff, 0 0 60px rgba(80, 200, 255, 0.4);
+            box-shadow: 0 0 20px #1e50a0, 0 0 60px rgba(30, 80, 160, 0.4);
             animation: core-glow 2s ease-in-out infinite;
             transition: all 0.3s ease;
         }
 
         .signal-ring.active {
-            border-color: rgba(80, 200, 255, 0.8);
-            box-shadow: 0 0 40px rgba(80, 200, 255, 0.3), 0 0 80px rgba(80, 200, 255, 0.15);
+            border-color: rgba(30, 80, 160, 0.8);
+            box-shadow: 0 0 40px rgba(30, 80, 160, 0.3), 0 0 80px rgba(30, 80, 160, 0.15);
         }
 
         .signal-ring.active::before {
-            border-color: rgba(80, 200, 255, 0.5);
+            border-color: rgba(30, 80, 160, 0.5);
         }
 
         .signal-ring.active::after {
-            border-color: rgba(80, 200, 255, 0.35);
+            border-color: rgba(30, 80, 160, 0.35);
         }
 
         .signal-ring.active .signal-core {
             width: 18px;
             height: 18px;
-            box-shadow: 0 0 40px #50c8ff, 0 0 100px rgba(80, 200, 255, 0.8), 0 0 160px rgba(80, 200, 255, 0.4), 0 0 250px rgba(167, 139, 250, 0.2);
+            box-shadow: 0 0 40px #1e50a0, 0 0 100px rgba(30, 80, 160, 0.8), 0 0 160px rgba(30, 80, 160, 0.4), 0 0 250px rgba(40, 50, 120, 0.2);
         }
 
         @keyframes pulse-ring {
@@ -129,8 +129,8 @@
         }
 
         @keyframes core-glow {
-            0%, 100% { box-shadow: 0 0 20px #50c8ff, 0 0 60px rgba(80, 200, 255, 0.4); }
-            50% { box-shadow: 0 0 30px #50c8ff, 0 0 80px rgba(80, 200, 255, 0.6), 0 0 120px rgba(80, 200, 255, 0.2); }
+            0%, 100% { box-shadow: 0 0 20px #1e50a0, 0 0 60px rgba(30, 80, 160, 0.4); }
+            50% { box-shadow: 0 0 30px #1e50a0, 0 0 80px rgba(30, 80, 160, 0.6), 0 0 120px rgba(30, 80, 160, 0.2); }
         }
 
         h1 {
@@ -139,7 +139,7 @@
             font-size: 3rem;
             letter-spacing: 0.3em;
             text-transform: uppercase;
-            background: linear-gradient(135deg, #50c8ff, #a78bfa, #50c8ff);
+            background: linear-gradient(135deg, #1e50a0, #3a5fc0, #1e50a0);
             background-size: 200% 200%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -157,7 +157,7 @@
             font-size: 0.85rem;
             letter-spacing: 0.4em;
             text-transform: uppercase;
-            color: rgba(167, 139, 250, 0.7);
+            color: rgba(40, 50, 120, 0.7);
             margin-bottom: 3rem;
         }
 
@@ -179,7 +179,7 @@
             font-size: 0.85rem;
             letter-spacing: 0.15em;
             text-transform: uppercase;
-            border: 1px solid rgba(80, 200, 255, 0.25);
+            border: 1px solid rgba(30, 80, 160, 0.25);
             border-radius: 2px;
             transition: all 0.3s ease;
             overflow: hidden;
@@ -192,7 +192,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(80, 200, 255, 0.08), transparent);
+            background: linear-gradient(90deg, transparent, rgba(30, 80, 160, 0.08), transparent);
             transition: left 0.5s ease;
         }
 
@@ -201,9 +201,9 @@
         }
 
         .links a:hover {
-            border-color: rgba(80, 200, 255, 0.6);
-            color: #50c8ff;
-            box-shadow: 0 0 20px rgba(80, 200, 255, 0.15), inset 0 0 20px rgba(80, 200, 255, 0.05);
+            border-color: rgba(30, 80, 160, 0.6);
+            color: #3a6fc0;
+            box-shadow: 0 0 20px rgba(30, 80, 160, 0.15), inset 0 0 20px rgba(30, 80, 160, 0.05);
         }
 
         .links a svg {
@@ -217,7 +217,7 @@
             bottom: 1.5rem;
             font-size: 0.65rem;
             letter-spacing: 0.3em;
-            color: rgba(80, 200, 255, 0.3);
+            color: rgba(30, 80, 160, 0.3);
             font-family: 'Space Mono', monospace;
         }
 
@@ -247,11 +247,11 @@
         <p class="tagline" id="alien-tagline">exploring the quantum void</p>
 
         <div class="links">
-            <a href="https://x.com/tolsadus" target="_blank" rel="noopener">
+            <a href="https://x.com/" target="_blank" rel="noopener">
                 <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                 X / Twitter
             </a>
-            <a href="https://github.com/tolsadus" target="_blank" rel="noopener">
+            <a href="http://github.com/" target="_blank" rel="noopener">
                 <svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
                 GitHub
             </a>
@@ -331,7 +331,7 @@
                     life: 1,
                     decay: Math.random() * 0.02 + 0.01,
                     size: Math.random() * 4 + 2,
-                    hue: Math.random() > 0.5 ? '80, 200, 255' : '167, 139, 250'
+                    hue: Math.random() > 0.5 ? '30, 80, 160' : '50, 100, 180'
                 });
             }
         }
@@ -379,25 +379,25 @@
 
         function getCursorColor() {
             const ring = document.querySelector('.signal-ring');
-            if (!ring) return { r: 200, g: 60, b: 60, t: 0 };
+            if (!ring) return { r: 120, g: 30, b: 30, t: 0 };
             const rect = ring.getBoundingClientRect();
             const cx = rect.left + rect.width / 2;
             const cy = rect.top + rect.height / 2;
             const dist = Math.hypot(cursor.x - cx, cursor.y - cy);
             const maxDist = Math.max(w, h) * 0.35;
             const t = Math.max(0, Math.min(1, 1 - dist / maxDist)); // 1 = center, 0 = far
-            // Interpolate: red(200,60,60) -> blue(80,200,255) -> white(220,230,255)
+            // Interpolate: dark red(120,30,30) -> dark blue(30,80,160) -> blue-white(80,120,200)
             let r, g, b;
             if (t < 0.5) {
                 const p = t / 0.5;
-                r = 200 + (80 - 200) * p;
-                g = 60 + (200 - 60) * p;
-                b = 60 + (255 - 60) * p;
+                r = 120 + (30 - 120) * p;
+                g = 30 + (80 - 30) * p;
+                b = 30 + (160 - 30) * p;
             } else {
                 const p = (t - 0.5) / 0.5;
-                r = 80 + (220 - 80) * p;
-                g = 200 + (230 - 200) * p;
-                b = 255;
+                r = 30 + (80 - 30) * p;
+                g = 80 + (120 - 80) * p;
+                b = 160 + (200 - 160) * p;
             }
             return { r: Math.round(r), g: Math.round(g), b: Math.round(b), t };
         }
@@ -474,7 +474,7 @@
                 if (dist < 100) {
                     ring.classList.add('active');
                     sparkleThrottle++;
-                    if (sparkleThrottle % 3 === 0) {
+                    if (sparkleThrottle % 6 === 0) {
                         spawnSparkles(cursor.x, cursor.y);
                     }
                 } else {
@@ -489,7 +489,7 @@
 
             // Nebula glow
             const grd = ctx.createRadialGradient(w * 0.3, h * 0.4, 0, w * 0.3, h * 0.4, w * 0.5);
-            grd.addColorStop(0, 'rgba(80, 40, 120, 0.04)');
+            grd.addColorStop(0, 'rgba(20, 20, 60, 0.04)');
             grd.addColorStop(1, 'transparent');
             ctx.fillStyle = grd;
             ctx.fillRect(0, 0, w, h);
@@ -510,7 +510,7 @@
                 if (s.r > 1.2) {
                     ctx.beginPath();
                     ctx.arc(s.x, s.y, s.r * 3, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(80, 200, 255, ${opacity * 0.1})`;
+                    ctx.fillStyle = `rgba(30, 80, 160, ${opacity * 0.1})`;
                     ctx.fill();
                 }
                 s.y += s.speed;
