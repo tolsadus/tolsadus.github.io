@@ -243,8 +243,8 @@
             <div class="signal-core"></div>
         </div>
 
-        <h1>tolsadus</h1>
-        <p class="tagline">exploring the quantum void</p>
+        <h1 id="alien-title">tolsadus</h1>
+        <p class="tagline" id="alien-tagline">exploring the quantum void</p>
 
         <div class="links">
             <a href="https://x.com/tolsadus" target="_blank" rel="noopener">
@@ -547,6 +547,41 @@
         init();
         drawLoop();
         window.addEventListener('resize', init);
+
+        // Alien text
+        const alienChars = '\u1400\u1401\u1402\u1403\u1404\u1405\u1406\u1407\u1408\u1409\u140A\u140B\u140C\u140D\u140E\u140F\u1410\u1411\u1412\u1413\u1414\u1415\u1416\u1417\u1418\u1419\u141A\u141B\u16A0\u16A1\u16A2\u16A3\u16A4\u16A5\u16A6\u16A7\u16A8\u16A9\u16AA\u16AB\u16AC\u16AD\u16AE\u16AF\u16B0\u16B1\u16B2\u16B3\u16B4\u16B5\u16B6\u16B7\u16B8\u16B9\u2D30\u2D31\u2D32\u2D33\u2D34\u2D35\u2D36\u2D37\u2D38\u2D39\u2D3A\u2D3B\u2D3C\u2D3D\u2D3E\u2D3F\u2D40\u2D41\u2D42\u2D43\u2D44\u2D45\u2D46\u2D47\u2D48\u2D49';
+        function randomAlien(len) {
+            let s = '';
+            for (let i = 0; i < len; i++) {
+                s += alienChars[Math.floor(Math.random() * alienChars.length)];
+            }
+            return s;
+        }
+
+        const titleEl = document.getElementById('alien-title');
+        const taglineEl = document.getElementById('alien-tagline');
+        const titleLen = 8;
+        const taglineLen = 18;
+
+        function flickerText() {
+            titleEl.textContent = randomAlien(titleLen);
+            taglineEl.textContent = randomAlien(taglineLen);
+        }
+
+        flickerText();
+        setInterval(() => {
+            // Occasionally flicker individual characters
+            const t = titleEl.textContent.split('');
+            const tg = taglineEl.textContent.split('');
+            for (let i = 0; i < t.length; i++) {
+                if (Math.random() < 0.15) t[i] = alienChars[Math.floor(Math.random() * alienChars.length)];
+            }
+            for (let i = 0; i < tg.length; i++) {
+                if (Math.random() < 0.1) tg[i] = alienChars[Math.floor(Math.random() * alienChars.length)];
+            }
+            titleEl.textContent = t.join('');
+            taglineEl.textContent = tg.join('');
+        }, 150);
     </script>
 </body>
 </html>
