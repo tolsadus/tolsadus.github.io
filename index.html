@@ -101,6 +101,26 @@
             border-radius: 50%;
             box-shadow: 0 0 20px #50c8ff, 0 0 60px rgba(80, 200, 255, 0.4);
             animation: core-glow 2s ease-in-out infinite;
+            transition: all 0.3s ease;
+        }
+
+        .signal-ring.active {
+            border-color: rgba(80, 200, 255, 0.8);
+            box-shadow: 0 0 40px rgba(80, 200, 255, 0.3), 0 0 80px rgba(80, 200, 255, 0.15);
+        }
+
+        .signal-ring.active::before {
+            border-color: rgba(80, 200, 255, 0.5);
+        }
+
+        .signal-ring.active::after {
+            border-color: rgba(80, 200, 255, 0.35);
+        }
+
+        .signal-ring.active .signal-core {
+            width: 18px;
+            height: 18px;
+            box-shadow: 0 0 40px #50c8ff, 0 0 100px rgba(80, 200, 255, 0.8), 0 0 160px rgba(80, 200, 255, 0.4), 0 0 250px rgba(167, 139, 250, 0.2);
         }
 
         @keyframes pulse-ring {
@@ -451,11 +471,34 @@
                 const cx = rect.left + rect.width / 2;
                 const cy = rect.top + rect.height / 2;
                 const dist = Math.hypot(cursor.x - cx, cursor.y - cy);
-                if (dist < 90) {
+                if (dist < 100) {
+                    ring.classList.add('active');
                     sparkleThrottle++;
-                    if (sparkleThrottle % 3 === 0) {
+                    if (sparkleThrottle % 2 === 0) {
                         spawnSparkles(cursor.x, cursor.y);
+                        // Also spawn sparkles around the ring edge
+                        const a = Math.random() * Math.PI * 2;
+                        spawnSparkles(cx + Math.cos(a) * 90, cy + Math.sin(a) * 90);
                     }
+                    // Draw a bright connection line between cursor and ring center
+                    cctx.strokeStyle = `rgba(80, 200, 255, ${0.2 + Math.sin(Date.now() * 0.008) * 0.1})`;
+                    cctx.lineWidth = 1;
+                    cctx.beginPath();
+                    cctx.moveTo(cursor.x, cursor.y);
+                    cctx.lineTo(cx, cy);
+                    cctx.stroke();
+                    // Draw a bright flash at the ring center
+                    const flashSize = 20 + Math.sin(Date.now() * 0.01) * 8;
+                    cctx.beginPath();
+                    cctx.arc(cx, cy, flashSize, 0, Math.PI * 2);
+                    cctx.fillStyle = `rgba(80, 200, 255, 0.08)`;
+                    cctx.fill();
+                    cctx.beginPath();
+                    cctx.arc(cx, cy, flashSize * 0.4, 0, Math.PI * 2);
+                    cctx.fillStyle = `rgba(167, 139, 250, 0.12)`;
+                    cctx.fill();
+                } else {
+                    ring.classList.remove('active');
                 }
             }
         }
