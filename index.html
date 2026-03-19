@@ -8,14 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background: #0a0a12;
+            background: #050510;
             color: #e0dcd0;
             font-family: 'Space Mono', monospace;
             overflow: hidden;
@@ -23,126 +19,34 @@
             width: 100vw;
         }
 
-        canvas#starfield {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 0;
-        }
-
-        canvas#cursor-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 10;
-            pointer-events: none;
-        }
+        canvas#starfield { position: fixed; top: 0; left: 0; z-index: 0; }
+        canvas#cursor-layer { position: fixed; top: 0; left: 0; z-index: 10; pointer-events: none; }
 
         .vignette {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(ellipse at center, transparent 50%, rgba(5, 5, 15, 0.8) 100%);
-            z-index: 1;
-            pointer-events: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(3, 3, 10, 0.85) 100%);
+            z-index: 1; pointer-events: none;
         }
 
         .container {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            text-align: center;
-            padding: 2rem;
+            position: relative; z-index: 2;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; text-align: center; padding: 2rem;
         }
 
-        .signal-ring {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            border: 2px solid rgba(30, 80, 160, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
+        .blackhole-spacer {
+            width: 200px;
+            height: 200px;
             margin-bottom: 2rem;
-            animation: pulse-ring 4s ease-in-out infinite;
-        }
-
-        .signal-ring::before,
-        .signal-ring::after {
-            content: '';
-            position: absolute;
-            border-radius: 50%;
-            border: 1px solid rgba(30, 80, 160, 0.15);
-        }
-
-        .signal-ring::before {
-            width: 220px;
-            height: 220px;
-            animation: pulse-ring 4s ease-in-out infinite 0.5s;
-        }
-
-        .signal-ring::after {
-            width: 260px;
-            height: 260px;
-            animation: pulse-ring 4s ease-in-out infinite 1s;
-        }
-
-        .signal-core {
-            width: 12px;
-            height: 12px;
-            background: #1e50a0;
-            border-radius: 50%;
-            box-shadow: 0 0 20px #1e50a0, 0 0 60px rgba(30, 80, 160, 0.4);
-            animation: core-glow 2s ease-in-out infinite;
-            transition: all 0.3s ease;
-        }
-
-        .signal-ring.active {
-            border-color: rgba(30, 80, 160, 0.8);
-            box-shadow: 0 0 40px rgba(30, 80, 160, 0.3), 0 0 80px rgba(30, 80, 160, 0.15);
-        }
-
-        .signal-ring.active::before {
-            border-color: rgba(30, 80, 160, 0.5);
-        }
-
-        .signal-ring.active::after {
-            border-color: rgba(30, 80, 160, 0.35);
-        }
-
-        .signal-ring.active .signal-core {
-            width: 18px;
-            height: 18px;
-            box-shadow: 0 0 40px #1e50a0, 0 0 100px rgba(30, 80, 160, 0.8), 0 0 160px rgba(30, 80, 160, 0.4), 0 0 250px rgba(40, 50, 120, 0.2);
-        }
-
-        @keyframes pulse-ring {
-            0%, 100% { transform: scale(1); opacity: 0.6; }
-            50% { transform: scale(1.05); opacity: 1; }
-        }
-
-        @keyframes core-glow {
-            0%, 100% { box-shadow: 0 0 20px #1e50a0, 0 0 60px rgba(30, 80, 160, 0.4); }
-            50% { box-shadow: 0 0 30px #1e50a0, 0 0 80px rgba(30, 80, 160, 0.6), 0 0 120px rgba(30, 80, 160, 0.2); }
         }
 
         h1 {
             font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            font-size: 3rem;
-            letter-spacing: 0.3em;
-            text-transform: uppercase;
+            font-weight: 900; font-size: 3rem;
+            letter-spacing: 0.3em; text-transform: uppercase;
             background: linear-gradient(135deg, #1e50a0, #3a5fc0, #1e50a0);
             background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
             animation: gradient-shift 6s ease infinite;
             margin-bottom: 1rem;
@@ -154,70 +58,38 @@
         }
 
         .tagline {
-            font-size: 0.85rem;
-            letter-spacing: 0.4em;
-            text-transform: uppercase;
-            color: rgba(40, 50, 120, 0.7);
-            margin-bottom: 3rem;
+            font-size: 0.85rem; letter-spacing: 0.4em; text-transform: uppercase;
+            color: rgba(40, 50, 120, 0.7); margin-bottom: 3rem;
         }
 
-        .links {
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
+        .links { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
 
         .links a {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            color: #e0dcd0;
-            text-decoration: none;
-            font-size: 0.85rem;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            border: 1px solid rgba(30, 80, 160, 0.25);
-            border-radius: 2px;
-            transition: all 0.3s ease;
-            overflow: hidden;
+            position: relative; display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.75rem 1.5rem; color: #e0dcd0; text-decoration: none;
+            font-size: 0.85rem; letter-spacing: 0.15em; text-transform: uppercase;
+            border: 1px solid rgba(30, 80, 160, 0.25); border-radius: 2px;
+            transition: all 0.3s ease; overflow: hidden;
         }
 
         .links a::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
             background: linear-gradient(90deg, transparent, rgba(30, 80, 160, 0.08), transparent);
             transition: left 0.5s ease;
         }
 
-        .links a:hover::before {
-            left: 100%;
-        }
+        .links a:hover::before { left: 100%; }
 
         .links a:hover {
-            border-color: rgba(30, 80, 160, 0.6);
-            color: #3a6fc0;
+            border-color: rgba(30, 80, 160, 0.6); color: #3a6fc0;
             box-shadow: 0 0 20px rgba(30, 80, 160, 0.15), inset 0 0 20px rgba(30, 80, 160, 0.05);
         }
 
-        .links a svg {
-            width: 18px;
-            height: 18px;
-            fill: currentColor;
-        }
+        .links a svg { width: 18px; height: 18px; fill: currentColor; }
 
         .coord {
-            position: fixed;
-            bottom: 1.5rem;
-            font-size: 0.65rem;
-            letter-spacing: 0.3em;
-            color: rgba(30, 80, 160, 0.3);
+            position: fixed; bottom: 1.5rem; font-size: 0.65rem;
+            letter-spacing: 0.3em; color: rgba(30, 80, 160, 0.3);
             font-family: 'Space Mono', monospace;
         }
 
@@ -227,9 +99,7 @@
         @media (max-width: 600px) {
             h1 { font-size: 1.8rem; letter-spacing: 0.2em; }
             .tagline { font-size: 0.7rem; }
-            .signal-ring { width: 130px; height: 130px; }
-            .signal-ring::before { width: 170px; height: 170px; }
-            .signal-ring::after { width: 210px; height: 210px; }
+            .blackhole-spacer { width: 140px; height: 140px; }
         }
     </style>
 </head>
@@ -239,9 +109,7 @@
     <div class="vignette"></div>
 
     <div class="container">
-        <div class="signal-ring">
-            <div class="signal-core"></div>
-        </div>
+        <div class="blackhole-spacer"></div>
 
         <h1 id="alien-title">tolsadus</h1>
         <p class="tagline" id="alien-tagline">exploring the quantum void</p>
@@ -269,13 +137,30 @@
 
         let w, h, stars, shootingStars;
 
+        // Black hole center (updated on resize)
+        let bhx, bhy;
+        const BH_RADIUS = 40;          // event horizon
+        const BH_ACCRETION = 100;       // accretion disk outer radius
+        const BH_INFLUENCE = 250;       // gravitational influence radius
+
         function init() {
             w = canvas.width = cursorCanvas.width = window.innerWidth;
             h = canvas.height = cursorCanvas.height = window.innerHeight;
 
-            stars = Array.from({ length: 300 }, () => ({
+            const spacer = document.querySelector('.blackhole-spacer');
+            if (spacer) {
+                const rect = spacer.getBoundingClientRect();
+                bhx = rect.left + rect.width / 2;
+                bhy = rect.top + rect.height / 2;
+            } else {
+                bhx = w / 2;
+                bhy = h / 2 - 80;
+            }
+
+            stars = Array.from({ length: 400 }, () => ({
                 x: Math.random() * w,
                 y: Math.random() * h,
+                ox: 0, oy: 0, // original position offsets for lensing
                 r: Math.random() * 1.5 + 0.3,
                 speed: Math.random() * 0.3 + 0.05,
                 flicker: Math.random() * Math.PI * 2,
@@ -288,8 +173,7 @@
         function spawnShootingStar() {
             if (Math.random() < 0.003 && shootingStars.length < 2) {
                 shootingStars.push({
-                    x: Math.random() * w,
-                    y: 0,
+                    x: Math.random() * w, y: 0,
                     len: Math.random() * 80 + 40,
                     speed: Math.random() * 6 + 4,
                     angle: Math.PI / 4 + Math.random() * 0.3,
@@ -298,9 +182,115 @@
             }
         }
 
+        // ---- Black hole rendering ----
+        function drawBlackHole() {
+            const time = Date.now() * 0.001;
 
+            // Gravitational lensing ring (photon sphere)
+            for (let i = 0; i < 3; i++) {
+                const radius = BH_RADIUS + 8 + i * 12;
+                const alpha = (0.12 - i * 0.03);
+                ctx.beginPath();
+                ctx.arc(bhx, bhy, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(60, 120, 200, ${alpha})`;
+                ctx.lineWidth = 1.5 - i * 0.3;
+                ctx.stroke();
+            }
 
-        // Cursor star follower
+            // Accretion disk - drawn as an ellipse with rotation
+            ctx.save();
+            ctx.translate(bhx, bhy);
+            ctx.rotate(0.3); // slight tilt
+
+            // Multiple layers of the accretion disk
+            for (let ring = 0; ring < 40; ring++) {
+                const radius = BH_RADIUS + 15 + ring * 2.2;
+                const angle = time * (1.5 - ring * 0.02) + ring * 0.5;
+
+                // Draw arc segments that rotate at different speeds
+                for (let seg = 0; seg < 6; seg++) {
+                    const startAngle = angle + seg * Math.PI / 3;
+                    const arcLen = Math.PI / 4 + Math.sin(time + ring + seg) * Math.PI / 8;
+
+                    const distFactor = 1 - (ring / 40);
+                    const r = Math.round(15 + 30 * distFactor);
+                    const g = Math.round(40 + 80 * distFactor);
+                    const b = Math.round(100 + 100 * distFactor);
+                    const a = (0.15 + 0.1 * distFactor) * (0.5 + 0.5 * Math.sin(time * 2 + ring + seg));
+
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, radius, radius * 0.35, 0, startAngle, startAngle + arcLen);
+                    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
+                    ctx.lineWidth = 2 - ring * 0.03;
+                    ctx.stroke();
+                }
+            }
+
+            // Bright inner edge of accretion disk
+            for (let i = 0; i < 20; i++) {
+                const angle = time * 2 + i * Math.PI / 10;
+                const radius = BH_RADIUS + 12 + Math.sin(time * 3 + i) * 4;
+                const px = Math.cos(angle) * radius;
+                const py = Math.sin(angle) * radius * 0.35;
+                const bright = 0.3 + 0.2 * Math.sin(time * 4 + i);
+
+                ctx.beginPath();
+                ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(80, 140, 220, ${bright})`;
+                ctx.fill();
+            }
+
+            ctx.restore();
+
+            // Event horizon - pure black circle with soft edge
+            const bhGrad = ctx.createRadialGradient(bhx, bhy, BH_RADIUS * 0.6, bhx, bhy, BH_RADIUS + 5);
+            bhGrad.addColorStop(0, 'rgba(0, 0, 0, 1)');
+            bhGrad.addColorStop(0.7, 'rgba(0, 0, 0, 1)');
+            bhGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.beginPath();
+            ctx.arc(bhx, bhy, BH_RADIUS + 5, 0, Math.PI * 2);
+            ctx.fillStyle = bhGrad;
+            ctx.fill();
+
+            // Subtle glow just outside event horizon
+            const glowGrad = ctx.createRadialGradient(bhx, bhy, BH_RADIUS, bhx, bhy, BH_RADIUS + 20);
+            glowGrad.addColorStop(0, 'rgba(20, 50, 120, 0.08)');
+            glowGrad.addColorStop(1, 'rgba(20, 50, 120, 0)');
+            ctx.beginPath();
+            ctx.arc(bhx, bhy, BH_RADIUS + 20, 0, Math.PI * 2);
+            ctx.fillStyle = glowGrad;
+            ctx.fill();
+        }
+
+        // Apply gravitational lensing to star positions
+        function lensedPosition(sx, sy) {
+            const dx = sx - bhx;
+            const dy = sy - bhy;
+            const dist = Math.hypot(dx, dy);
+
+            if (dist < BH_RADIUS) {
+                return null; // swallowed by black hole
+            }
+
+            if (dist < BH_INFLUENCE) {
+                const strength = Math.pow(1 - (dist - BH_RADIUS) / (BH_INFLUENCE - BH_RADIUS), 2) * 30;
+                // Bend light around the black hole (perpendicular + radial pull)
+                const angle = Math.atan2(dy, dx);
+                const perpAngle = angle + Math.PI / 2;
+                const radialPull = strength * 0.4;
+                const tangentialPush = strength * 0.6;
+
+                return {
+                    x: sx - Math.cos(angle) * radialPull + Math.cos(perpAngle) * tangentialPush * Math.sign(Math.sin(angle)),
+                    y: sy - Math.sin(angle) * radialPull + Math.sin(perpAngle) * tangentialPush * Math.sign(Math.cos(angle)),
+                    brightened: dist < BH_ACCRETION ? 1.5 : 1
+                };
+            }
+
+            return { x: sx, y: sy, brightened: 1 };
+        }
+
+        // ---- Cursor ----
         let mouse = { x: 0, y: 0 };
         let cursor = { x: 0, y: 0 };
         const trail = [];
@@ -321,16 +311,16 @@
         const sparkles = [];
 
         function spawnSparkles(x, y) {
-            for (let i = 0; i < 12; i++) {
+            for (let i = 0; i < 6; i++) {
                 const angle = Math.random() * Math.PI * 2;
-                const speed = Math.random() * 4 + 2;
+                const speed = Math.random() * 2.5 + 1;
                 sparkles.push({
                     x, y,
                     vx: Math.cos(angle) * speed,
                     vy: Math.sin(angle) * speed,
                     life: 1,
-                    decay: Math.random() * 0.02 + 0.01,
-                    size: Math.random() * 4 + 2,
+                    decay: Math.random() * 0.025 + 0.012,
+                    size: Math.random() * 3 + 1,
                     hue: Math.random() > 0.5 ? '30, 80, 160' : '50, 100, 180'
                 });
             }
@@ -345,48 +335,26 @@
                 sp.vy *= 0.96;
                 sp.life -= sp.decay;
 
-                if (sp.life <= 0) {
-                    sparkles.splice(i, 1);
-                    continue;
-                }
+                if (sp.life <= 0) { sparkles.splice(i, 1); continue; }
 
-                // Glow
                 cctx.beginPath();
                 cctx.arc(sp.x, sp.y, sp.size * 2, 0, Math.PI * 2);
                 cctx.fillStyle = `rgba(${sp.hue}, ${sp.life * 0.15})`;
                 cctx.fill();
 
-                // Core
                 cctx.beginPath();
                 cctx.arc(sp.x, sp.y, sp.size * sp.life, 0, Math.PI * 2);
                 cctx.fillStyle = `rgba(${sp.hue}, ${sp.life * 0.8})`;
                 cctx.fill();
-
-                // Tiny cross flare
-                cctx.strokeStyle = `rgba(${sp.hue}, ${sp.life * 0.4})`;
-                cctx.lineWidth = 0.4;
-                const fl = sp.size * 3 * sp.life;
-                cctx.beginPath();
-                cctx.moveTo(sp.x - fl, sp.y);
-                cctx.lineTo(sp.x + fl, sp.y);
-                cctx.moveTo(sp.x, sp.y - fl);
-                cctx.lineTo(sp.x, sp.y + fl);
-                cctx.stroke();
             }
         }
 
         let sparkleThrottle = 0;
 
         function getCursorColor() {
-            const ring = document.querySelector('.signal-ring');
-            if (!ring) return { r: 120, g: 30, b: 30, t: 0 };
-            const rect = ring.getBoundingClientRect();
-            const cx = rect.left + rect.width / 2;
-            const cy = rect.top + rect.height / 2;
-            const dist = Math.hypot(cursor.x - cx, cursor.y - cy);
+            const dist = Math.hypot(cursor.x - bhx, cursor.y - bhy);
             const maxDist = Math.max(w, h) * 0.35;
-            const t = Math.max(0, Math.min(1, 1 - dist / maxDist)); // 1 = center, 0 = far
-            // Interpolate: dark red(120,30,30) -> dark blue(30,80,160) -> blue-white(80,120,200)
+            const t = Math.max(0, Math.min(1, 1 - dist / maxDist));
             let r, g, b;
             if (t < 0.5) {
                 const p = t / 0.5;
@@ -403,7 +371,6 @@
         }
 
         function drawCursorStar() {
-            // Smooth follow
             cursor.x += (mouse.x - cursor.x) * 0.12;
             cursor.y += (mouse.y - cursor.y) * 0.12;
 
@@ -417,43 +384,35 @@
             for (let i = 0; i < trail.length; i++) {
                 const t = trail[i];
                 const progress = i / trail.length;
-                const r = progress * 3.5;
-                const alpha = progress * 0.6;
                 cctx.beginPath();
-                cctx.arc(t.x, t.y, r, 0, Math.PI * 2);
-                cctx.fillStyle = `rgba(${rgb}, ${alpha})`;
+                cctx.arc(t.x, t.y, progress * 3.5, 0, Math.PI * 2);
+                cctx.fillStyle = `rgba(${rgb}, ${progress * 0.6})`;
                 cctx.fill();
             }
 
-            // Main cursor star
             const size = 6;
             const glow = 8 + Math.sin(Date.now() * 0.005) * 3;
 
-            // Large outer glow
             cctx.beginPath();
             cctx.arc(cursor.x, cursor.y, size + glow + 10, 0, Math.PI * 2);
             cctx.fillStyle = `rgba(${rgb}, 0.06)`;
             cctx.fill();
 
-            // Outer glow
             cctx.beginPath();
             cctx.arc(cursor.x, cursor.y, size + glow, 0, Math.PI * 2);
             cctx.fillStyle = `rgba(${rgb}, 0.15)`;
             cctx.fill();
 
-            // Inner glow
             cctx.beginPath();
             cctx.arc(cursor.x, cursor.y, size, 0, Math.PI * 2);
             cctx.fillStyle = `rgba(${rgb}, 0.6)`;
             cctx.fill();
 
-            // Core
             cctx.beginPath();
             cctx.arc(cursor.x, cursor.y, 3, 0, Math.PI * 2);
             cctx.fillStyle = `rgba(${Math.min(col.r + 40, 255)}, ${Math.min(col.g + 30, 255)}, 255, 1)`;
             cctx.fill();
 
-            // Cross flare
             cctx.strokeStyle = `rgba(${rgb}, ${0.3 + Math.sin(Date.now() * 0.003) * 0.15})`;
             cctx.lineWidth = 1;
             const flareLen = size + glow + 15;
@@ -464,25 +423,17 @@
             cctx.lineTo(cursor.x, cursor.y + flareLen);
             cctx.stroke();
 
-            // Check collision with signal ring center
-            const ring = document.querySelector('.signal-ring');
-            if (ring) {
-                const rect = ring.getBoundingClientRect();
-                const cx = rect.left + rect.width / 2;
-                const cy = rect.top + rect.height / 2;
-                const dist = Math.hypot(cursor.x - cx, cursor.y - cy);
-                if (dist < 100) {
-                    ring.classList.add('active');
-                    sparkleThrottle++;
-                    if (sparkleThrottle % 6 === 0) {
-                        spawnSparkles(cursor.x, cursor.y);
-                    }
-                } else {
-                    ring.classList.remove('active');
+            // Sparkle near black hole
+            const dist = Math.hypot(cursor.x - bhx, cursor.y - bhy);
+            if (dist < BH_ACCRETION + 20) {
+                sparkleThrottle++;
+                if (sparkleThrottle % 8 === 0) {
+                    spawnSparkles(cursor.x, cursor.y);
                 }
             }
         }
 
+        // ---- Main loop ----
         function drawLoop() {
             ctx.clearRect(0, 0, w, h);
             cctx.clearRect(0, 0, w, h);
@@ -500,23 +451,30 @@
             ctx.fillStyle = grd2;
             ctx.fillRect(0, 0, w, h);
 
+            // Stars with gravitational lensing
             for (const s of stars) {
                 s.flicker += s.flickerSpeed;
-                const opacity = 0.4 + Math.sin(s.flicker) * 0.3;
+                s.y += s.speed;
+                if (s.y > h + 5) { s.y = -5; s.x = Math.random() * w; }
+
+                const lensed = lensedPosition(s.x, s.y);
+                if (!lensed) continue; // swallowed
+
+                const opacity = (0.4 + Math.sin(s.flicker) * 0.3) * lensed.brightened;
                 ctx.beginPath();
-                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.arc(lensed.x, lensed.y, s.r, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(220, 225, 240, ${opacity})`;
                 ctx.fill();
+
                 if (s.r > 1.2) {
                     ctx.beginPath();
-                    ctx.arc(s.x, s.y, s.r * 3, 0, Math.PI * 2);
+                    ctx.arc(lensed.x, lensed.y, s.r * 3, 0, Math.PI * 2);
                     ctx.fillStyle = `rgba(30, 80, 160, ${opacity * 0.1})`;
                     ctx.fill();
                 }
-                s.y += s.speed;
-                if (s.y > h + 5) { s.y = -5; s.x = Math.random() * w; }
             }
 
+            // Shooting stars
             spawnShootingStar();
             for (let i = shootingStars.length - 1; i >= 0; i--) {
                 const ss = shootingStars[i];
@@ -539,6 +497,9 @@
                 }
             }
 
+            // Black hole (drawn after stars so it covers them)
+            drawBlackHole();
+
             if (mouseActive) drawCursorStar();
             drawSparkles();
             requestAnimationFrame(drawLoop);
@@ -552,25 +513,17 @@
         const alienChars = '\u1400\u1401\u1402\u1403\u1404\u1405\u1406\u1407\u1408\u1409\u140A\u140B\u140C\u140D\u140E\u140F\u1410\u1411\u1412\u1413\u1414\u1415\u1416\u1417\u1418\u1419\u141A\u141B\u16A0\u16A1\u16A2\u16A3\u16A4\u16A5\u16A6\u16A7\u16A8\u16A9\u16AA\u16AB\u16AC\u16AD\u16AE\u16AF\u16B0\u16B1\u16B2\u16B3\u16B4\u16B5\u16B6\u16B7\u16B8\u16B9\u2D30\u2D31\u2D32\u2D33\u2D34\u2D35\u2D36\u2D37\u2D38\u2D39\u2D3A\u2D3B\u2D3C\u2D3D\u2D3E\u2D3F\u2D40\u2D41\u2D42\u2D43\u2D44\u2D45\u2D46\u2D47\u2D48\u2D49';
         function randomAlien(len) {
             let s = '';
-            for (let i = 0; i < len; i++) {
-                s += alienChars[Math.floor(Math.random() * alienChars.length)];
-            }
+            for (let i = 0; i < len; i++) s += alienChars[Math.floor(Math.random() * alienChars.length)];
             return s;
         }
 
         const titleEl = document.getElementById('alien-title');
         const taglineEl = document.getElementById('alien-tagline');
-        const titleLen = 8;
-        const taglineLen = 18;
 
-        function flickerText() {
-            titleEl.textContent = randomAlien(titleLen);
-            taglineEl.textContent = randomAlien(taglineLen);
-        }
+        titleEl.textContent = randomAlien(8);
+        taglineEl.textContent = randomAlien(18);
 
-        flickerText();
         setInterval(() => {
-            // Occasionally flicker individual characters
             const t = titleEl.textContent.split('');
             const tg = taglineEl.textContent.split('');
             for (let i = 0; i < t.length; i++) {
