@@ -17,7 +17,6 @@
             overflow: hidden;
             height: 100vh;
             width: 100vw;
-            cursor: none;
         }
 
         canvas#starfield { position: fixed; top: 0; left: 0; z-index: 0; }
@@ -32,12 +31,14 @@
         .container {
             position: relative; z-index: 2;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; text-align: center; padding: 2rem; pointer-events: none;
+            height: 100vh; text-align: center; padding: 2rem;
         }
 
-        .container a { pointer-events: auto; cursor: none; }
-
-        .blackhole-spacer { width: 200px; height: 200px; margin-bottom: 2rem; }
+        .blackhole-spacer {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 2rem;
+        }
 
         h1 {
             font-family: 'Orbitron', sans-serif;
@@ -134,20 +135,17 @@
         const cursorCanvas = document.getElementById('cursor-layer');
         const cctx = cursorCanvas.getContext('2d');
 
-        // Offscreen canvas for pre-lensing starfield
-        const offscreen = document.createElement('canvas');
-        const octx = offscreen.getContext('2d');
-
         let w, h, stars, shootingStars;
-        let bhx, bhy;
 
-        const EVENT_HORIZON = 35;
-        const EINSTEIN_RADIUS = 70;
-        const LENSING_REGION = 180;
+        // Black hole center (updated on resize)
+        let bhx, bhy;
+        const BH_RADIUS = 40;          // event horizon
+        const BH_ACCRETION = 100;       // accretion disk outer radius
+        const BH_INFLUENCE = 250;       // gravitational influence radius
 
         function init() {
-            w = canvas.width = cursorCanvas.width = offscreen.width = window.innerWidth;
-            h = canvas.height = cursorCanvas.height = offscreen.height = window.innerHeight;
+            w = canvas.width = cursorCanvas.width = window.innerWidth;
+            h = canvas.height = cursorCanvas.height = window.innerHeight;
 
             const spacer = document.querySelector('.blackhole-spacer');
             if (spacer) {
@@ -155,17 +153,20 @@
                 bhx = rect.left + rect.width / 2;
                 bhy = rect.top + rect.height / 2;
             } else {
-                bhx = w / 2; bhy = h / 2 - 80;
+                bhx = w / 2;
+                bhy = h / 2 - 80;
             }
 
-            stars = Array.from({ length: 500 }, () => ({
+            stars = Array.from({ length: 400 }, () => ({
                 x: Math.random() * w,
                 y: Math.random() * h,
-                r: Math.random() * 1.8 + 0.3,
+                ox: 0, oy: 0, // original position offsets for lensing
+                r: Math.random() * 1.5 + 0.3,
                 speed: Math.random() * 0.3 + 0.05,
                 flicker: Math.random() * Math.PI * 2,
                 flickerSpeed: Math.random() * 0.02 + 0.005
             }));
+
             shootingStars = [];
         }
 
@@ -181,199 +182,112 @@
             }
         }
 
-        function drawStarsToOffscreen() {
-            octx.fillStyle = '#050510';
-            octx.fillRect(0, 0, w, h);
+        // ---- Black hole rendering ----
+        function drawBlackHole() {
+            const time = Date.now() * 0.001;
 
-            // Nebula
-            const grd = octx.createRadialGradient(w * 0.3, h * 0.4, 0, w * 0.3, h * 0.4, w * 0.5);
-            grd.addColorStop(0, 'rgba(20, 20, 60, 0.06)');
-            grd.addColorStop(1, 'transparent');
-            octx.fillStyle = grd;
-            octx.fillRect(0, 0, w, h);
-
-            const grd2 = octx.createRadialGradient(w * 0.7, h * 0.6, 0, w * 0.7, h * 0.6, w * 0.4);
-            grd2.addColorStop(0, 'rgba(15, 30, 80, 0.05)');
-            grd2.addColorStop(1, 'transparent');
-            octx.fillStyle = grd2;
-            octx.fillRect(0, 0, w, h);
-
-            // Stars
-            for (const s of stars) {
-                s.flicker += s.flickerSpeed;
-                s.y += s.speed;
-                if (s.y > h + 5) { s.y = -5; s.x = Math.random() * w; }
-
-                const opacity = 0.5 + Math.sin(s.flicker) * 0.3;
-                octx.beginPath();
-                octx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                octx.fillStyle = `rgba(200, 210, 240, ${opacity})`;
-                octx.fill();
-
-                if (s.r > 1.3) {
-                    octx.beginPath();
-                    octx.arc(s.x, s.y, s.r * 3, 0, Math.PI * 2);
-                    octx.fillStyle = `rgba(150, 180, 220, ${opacity * 0.08})`;
-                    octx.fill();
-                }
+            // Gravitational lensing ring (photon sphere)
+            for (let i = 0; i < 3; i++) {
+                const radius = BH_RADIUS + 8 + i * 12;
+                const alpha = (0.12 - i * 0.03);
+                ctx.beginPath();
+                ctx.arc(bhx, bhy, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(60, 120, 200, ${alpha})`;
+                ctx.lineWidth = 1.5 - i * 0.3;
+                ctx.stroke();
             }
 
-            // Shooting stars
-            spawnShootingStar();
-            for (let i = shootingStars.length - 1; i >= 0; i--) {
-                const ss = shootingStars[i];
-                const endX = ss.x - Math.cos(ss.angle) * ss.len;
-                const endY = ss.y - Math.sin(ss.angle) * ss.len;
-                const grad = octx.createLinearGradient(ss.x, ss.y, endX, endY);
-                grad.addColorStop(0, `rgba(200, 220, 255, ${ss.opacity})`);
-                grad.addColorStop(1, 'transparent');
-                octx.beginPath();
-                octx.moveTo(ss.x, ss.y);
-                octx.lineTo(endX, endY);
-                octx.strokeStyle = grad;
-                octx.lineWidth = 1.5;
-                octx.stroke();
-                ss.x += Math.cos(ss.angle) * ss.speed;
-                ss.y += Math.sin(ss.angle) * ss.speed;
-                ss.opacity -= 0.008;
-                if (ss.opacity <= 0 || ss.x > w + 100 || ss.y > h + 100) {
-                    shootingStars.splice(i, 1);
-                }
-            }
-        }
-
-        function applyGravitationalLensing() {
-            // Copy the offscreen (unlensed) starfield to main canvas
-            ctx.drawImage(offscreen, 0, 0);
-
-            // Define the region around the black hole to distort
-            const regionSize = LENSING_REGION + 40;
-            const rx = Math.max(0, Math.floor(bhx - regionSize));
-            const ry = Math.max(0, Math.floor(bhy - regionSize));
-            const rw = Math.min(w - rx, Math.ceil(regionSize * 2));
-            const rh = Math.min(h - ry, Math.ceil(regionSize * 2));
-
-            if (rw <= 0 || rh <= 0) return;
-
-            // Read source pixels from the offscreen (unlensed) canvas
-            const srcData = octx.getImageData(rx, ry, rw, rh);
-            const src = srcData.data;
-
-            // Create output buffer
-            const dstData = ctx.createImageData(rw, rh);
-            const dst = dstData.data;
-
-            const RE2 = EINSTEIN_RADIUS * EINSTEIN_RADIUS;
-            const localBHX = bhx - rx;
-            const localBHY = bhy - ry;
-
-            for (let py = 0; py < rh; py++) {
-                for (let px = 0; px < rw; px++) {
-                    const dx = px - localBHX;
-                    const dy = py - localBHY;
-                    const d = Math.sqrt(dx * dx + dy * dy);
-
-                    const dstIdx = (py * rw + px) * 4;
-
-                    if (d < EVENT_HORIZON) {
-                        // Inside event horizon: pure black
-                        dst[dstIdx] = 5;
-                        dst[dstIdx + 1] = 5;
-                        dst[dstIdx + 2] = 16;
-                        dst[dstIdx + 3] = 255;
-                        continue;
-                    }
-
-                    if (d < LENSING_REGION) {
-                        // Gravitational lensing: sample from displaced source position
-                        // The source is pulled inward (we see light from further out)
-                        const lensStrength = RE2 / d;
-                        const sourceD = d + lensStrength;
-                        const angle = Math.atan2(dy, dx);
-
-                        let sx = Math.round(localBHX + Math.cos(angle) * sourceD);
-                        let sy = Math.round(localBHY + Math.sin(angle) * sourceD);
-
-                        // Clamp to canvas
-                        sx = Math.max(0, Math.min(rw - 1, sx));
-                        sy = Math.max(0, Math.min(rh - 1, sy));
-
-                        const srcIdx = (sy * rw + sx) * 4;
-
-                        // Brightness amplification near Einstein ring
-                        const ringDist = Math.abs(d - EINSTEIN_RADIUS);
-                        const amp = 1 + Math.max(0, 1 - ringDist / 30) * 1.5;
-
-                        dst[dstIdx] = Math.min(255, src[srcIdx] * amp);
-                        dst[dstIdx + 1] = Math.min(255, src[srcIdx + 1] * amp);
-                        dst[dstIdx + 2] = Math.min(255, src[srcIdx + 2] * amp);
-                        dst[dstIdx + 3] = 255;
-                    } else {
-                        // Outside lensing: copy directly
-                        const srcIdx = (py * rw + px) * 4;
-                        dst[dstIdx] = src[srcIdx];
-                        dst[dstIdx + 1] = src[srcIdx + 1];
-                        dst[dstIdx + 2] = src[srcIdx + 2];
-                        dst[dstIdx + 3] = src[srcIdx + 3];
-                    }
-                }
-            }
-
-            ctx.putImageData(dstData, rx, ry);
-
-            // Draw accretion disk glow on top
-            const time = Date.now() * 0.0008;
-
+            // Accretion disk - drawn as an ellipse with rotation
             ctx.save();
             ctx.translate(bhx, bhy);
+            ctx.rotate(0.3); // slight tilt
 
-            // Thin accretion disk — tilted ellipse
-            for (let ring = 0; ring < 25; ring++) {
-                const radius = EVENT_HORIZON + 8 + ring * 3;
-                const distFactor = 1 - ring / 25;
-                const baseAlpha = 0.06 + 0.08 * distFactor;
+            // Multiple layers of the accretion disk
+            for (let ring = 0; ring < 40; ring++) {
+                const radius = BH_RADIUS + 15 + ring * 2.2;
+                const angle = time * (1.5 - ring * 0.02) + ring * 0.5;
 
-                for (let seg = 0; seg < 8; seg++) {
-                    const startAngle = time * (1.2 - ring * 0.015) + seg * Math.PI / 4;
-                    const arcLen = Math.PI / 5 + Math.sin(time * 2 + ring * 0.3 + seg) * Math.PI / 10;
-                    const alpha = baseAlpha * (0.4 + 0.6 * Math.sin(time * 1.5 + ring + seg));
+                // Draw arc segments that rotate at different speeds
+                for (let seg = 0; seg < 6; seg++) {
+                    const startAngle = angle + seg * Math.PI / 3;
+                    const arcLen = Math.PI / 4 + Math.sin(time + ring + seg) * Math.PI / 8;
 
-                    const r = Math.round(20 + 25 * distFactor);
-                    const g = Math.round(50 + 60 * distFactor);
-                    const b = Math.round(120 + 80 * distFactor);
+                    const distFactor = 1 - (ring / 40);
+                    const r = Math.round(15 + 30 * distFactor);
+                    const g = Math.round(40 + 80 * distFactor);
+                    const b = Math.round(100 + 100 * distFactor);
+                    const a = (0.15 + 0.1 * distFactor) * (0.5 + 0.5 * Math.sin(time * 2 + ring + seg));
 
                     ctx.beginPath();
-                    ctx.ellipse(0, 0, radius, radius * 0.3, 0.4, startAngle, startAngle + arcLen);
-                    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
-                    ctx.lineWidth = 1.5 - ring * 0.04;
+                    ctx.ellipse(0, 0, radius, radius * 0.35, 0, startAngle, startAngle + arcLen);
+                    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
+                    ctx.lineWidth = 2 - ring * 0.03;
                     ctx.stroke();
                 }
             }
 
-            // Bright photon ring
-            ctx.beginPath();
-            ctx.ellipse(0, 0, EVENT_HORIZON + 5, (EVENT_HORIZON + 5) * 0.3, 0.4, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(60, 100, 180, ${0.15 + Math.sin(time * 3) * 0.05})`;
-            ctx.lineWidth = 2;
-            ctx.stroke();
+            // Bright inner edge of accretion disk
+            for (let i = 0; i < 20; i++) {
+                const angle = time * 2 + i * Math.PI / 10;
+                const radius = BH_RADIUS + 12 + Math.sin(time * 3 + i) * 4;
+                const px = Math.cos(angle) * radius;
+                const py = Math.sin(angle) * radius * 0.35;
+                const bright = 0.3 + 0.2 * Math.sin(time * 4 + i);
 
-            ctx.beginPath();
-            ctx.ellipse(0, 0, EVENT_HORIZON + 3, (EVENT_HORIZON + 3) * 0.3, 0.4, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(80, 130, 200, ${0.1 + Math.sin(time * 3 + 1) * 0.04})`;
-            ctx.lineWidth = 1;
-            ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(80, 140, 220, ${bright})`;
+                ctx.fill();
+            }
 
             ctx.restore();
 
-            // Soft dark fade at event horizon edge
-            const bhEdge = ctx.createRadialGradient(bhx, bhy, EVENT_HORIZON - 5, bhx, bhy, EVENT_HORIZON + 8);
-            bhEdge.addColorStop(0, 'rgba(5, 5, 16, 1)');
-            bhEdge.addColorStop(0.5, 'rgba(5, 5, 16, 0.8)');
-            bhEdge.addColorStop(1, 'rgba(5, 5, 16, 0)');
+            // Event horizon - pure black circle with soft edge
+            const bhGrad = ctx.createRadialGradient(bhx, bhy, BH_RADIUS * 0.6, bhx, bhy, BH_RADIUS + 5);
+            bhGrad.addColorStop(0, 'rgba(0, 0, 0, 1)');
+            bhGrad.addColorStop(0.7, 'rgba(0, 0, 0, 1)');
+            bhGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
             ctx.beginPath();
-            ctx.arc(bhx, bhy, EVENT_HORIZON + 8, 0, Math.PI * 2);
-            ctx.fillStyle = bhEdge;
+            ctx.arc(bhx, bhy, BH_RADIUS + 5, 0, Math.PI * 2);
+            ctx.fillStyle = bhGrad;
             ctx.fill();
+
+            // Subtle glow just outside event horizon
+            const glowGrad = ctx.createRadialGradient(bhx, bhy, BH_RADIUS, bhx, bhy, BH_RADIUS + 20);
+            glowGrad.addColorStop(0, 'rgba(20, 50, 120, 0.08)');
+            glowGrad.addColorStop(1, 'rgba(20, 50, 120, 0)');
+            ctx.beginPath();
+            ctx.arc(bhx, bhy, BH_RADIUS + 20, 0, Math.PI * 2);
+            ctx.fillStyle = glowGrad;
+            ctx.fill();
+        }
+
+        // Apply gravitational lensing to star positions
+        function lensedPosition(sx, sy) {
+            const dx = sx - bhx;
+            const dy = sy - bhy;
+            const dist = Math.hypot(dx, dy);
+
+            if (dist < BH_RADIUS) {
+                return null; // swallowed by black hole
+            }
+
+            if (dist < BH_INFLUENCE) {
+                const strength = Math.pow(1 - (dist - BH_RADIUS) / (BH_INFLUENCE - BH_RADIUS), 2) * 30;
+                // Bend light around the black hole (perpendicular + radial pull)
+                const angle = Math.atan2(dy, dx);
+                const perpAngle = angle + Math.PI / 2;
+                const radialPull = strength * 0.4;
+                const tangentialPush = strength * 0.6;
+
+                return {
+                    x: sx - Math.cos(angle) * radialPull + Math.cos(perpAngle) * tangentialPush * Math.sign(Math.sin(angle)),
+                    y: sy - Math.sin(angle) * radialPull + Math.sin(perpAngle) * tangentialPush * Math.sign(Math.cos(angle)),
+                    brightened: dist < BH_ACCRETION ? 1.5 : 1
+                };
+            }
+
+            return { x: sx, y: sy, brightened: 1 };
         }
 
         // ---- Cursor ----
@@ -386,22 +300,27 @@
         window.addEventListener('mousemove', (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
-            if (!mouseActive) { cursor.x = mouse.x; cursor.y = mouse.y; mouseActive = true; }
+            if (!mouseActive) {
+                cursor.x = mouse.x;
+                cursor.y = mouse.y;
+                mouseActive = true;
+            }
         });
 
+        // Sparkle particles
         const sparkles = [];
 
         function spawnSparkles(x, y) {
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 6; i++) {
                 const angle = Math.random() * Math.PI * 2;
-                const speed = Math.random() * 2 + 1;
+                const speed = Math.random() * 2.5 + 1;
                 sparkles.push({
                     x, y,
                     vx: Math.cos(angle) * speed,
                     vy: Math.sin(angle) * speed,
                     life: 1,
                     decay: Math.random() * 0.025 + 0.012,
-                    size: Math.random() * 2.5 + 1,
+                    size: Math.random() * 3 + 1,
                     hue: Math.random() > 0.5 ? '30, 80, 160' : '50, 100, 180'
                 });
             }
@@ -410,14 +329,22 @@
         function drawSparkles() {
             for (let i = sparkles.length - 1; i >= 0; i--) {
                 const sp = sparkles[i];
-                sp.x += sp.vx; sp.y += sp.vy;
-                sp.vx *= 0.96; sp.vy *= 0.96;
+                sp.x += sp.vx;
+                sp.y += sp.vy;
+                sp.vx *= 0.96;
+                sp.vy *= 0.96;
                 sp.life -= sp.decay;
+
                 if (sp.life <= 0) { sparkles.splice(i, 1); continue; }
 
                 cctx.beginPath();
+                cctx.arc(sp.x, sp.y, sp.size * 2, 0, Math.PI * 2);
+                cctx.fillStyle = `rgba(${sp.hue}, ${sp.life * 0.15})`;
+                cctx.fill();
+
+                cctx.beginPath();
                 cctx.arc(sp.x, sp.y, sp.size * sp.life, 0, Math.PI * 2);
-                cctx.fillStyle = `rgba(${sp.hue}, ${sp.life * 0.7})`;
+                cctx.fillStyle = `rgba(${sp.hue}, ${sp.life * 0.8})`;
                 cctx.fill();
             }
         }
@@ -450,6 +377,7 @@
             const col = getCursorColor();
             const rgb = `${col.r}, ${col.g}, ${col.b}`;
 
+            // Trail
             trail.push({ x: cursor.x, y: cursor.y });
             if (trail.length > trailLen) trail.shift();
 
@@ -495,11 +423,11 @@
             cctx.lineTo(cursor.x, cursor.y + flareLen);
             cctx.stroke();
 
-            // Subtle sparkle near BH
+            // Sparkle near black hole
             const dist = Math.hypot(cursor.x - bhx, cursor.y - bhy);
-            if (dist < LENSING_REGION) {
+            if (dist < BH_ACCRETION + 20) {
                 sparkleThrottle++;
-                if (sparkleThrottle % 10 === 0) {
+                if (sparkleThrottle % 8 === 0) {
                     spawnSparkles(cursor.x, cursor.y);
                 }
             }
@@ -507,10 +435,70 @@
 
         // ---- Main loop ----
         function drawLoop() {
+            ctx.clearRect(0, 0, w, h);
             cctx.clearRect(0, 0, w, h);
 
-            drawStarsToOffscreen();
-            applyGravitationalLensing();
+            // Nebula glow
+            const grd = ctx.createRadialGradient(w * 0.3, h * 0.4, 0, w * 0.3, h * 0.4, w * 0.5);
+            grd.addColorStop(0, 'rgba(20, 20, 60, 0.04)');
+            grd.addColorStop(1, 'transparent');
+            ctx.fillStyle = grd;
+            ctx.fillRect(0, 0, w, h);
+
+            const grd2 = ctx.createRadialGradient(w * 0.7, h * 0.6, 0, w * 0.7, h * 0.6, w * 0.4);
+            grd2.addColorStop(0, 'rgba(30, 60, 120, 0.03)');
+            grd2.addColorStop(1, 'transparent');
+            ctx.fillStyle = grd2;
+            ctx.fillRect(0, 0, w, h);
+
+            // Stars with gravitational lensing
+            for (const s of stars) {
+                s.flicker += s.flickerSpeed;
+                s.y += s.speed;
+                if (s.y > h + 5) { s.y = -5; s.x = Math.random() * w; }
+
+                const lensed = lensedPosition(s.x, s.y);
+                if (!lensed) continue; // swallowed
+
+                const opacity = (0.4 + Math.sin(s.flicker) * 0.3) * lensed.brightened;
+                ctx.beginPath();
+                ctx.arc(lensed.x, lensed.y, s.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(220, 225, 240, ${opacity})`;
+                ctx.fill();
+
+                if (s.r > 1.2) {
+                    ctx.beginPath();
+                    ctx.arc(lensed.x, lensed.y, s.r * 3, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(30, 80, 160, ${opacity * 0.1})`;
+                    ctx.fill();
+                }
+            }
+
+            // Shooting stars
+            spawnShootingStar();
+            for (let i = shootingStars.length - 1; i >= 0; i--) {
+                const ss = shootingStars[i];
+                const endX = ss.x - Math.cos(ss.angle) * ss.len;
+                const endY = ss.y - Math.sin(ss.angle) * ss.len;
+                const grad = ctx.createLinearGradient(ss.x, ss.y, endX, endY);
+                grad.addColorStop(0, `rgba(200, 220, 255, ${ss.opacity})`);
+                grad.addColorStop(1, 'transparent');
+                ctx.beginPath();
+                ctx.moveTo(ss.x, ss.y);
+                ctx.lineTo(endX, endY);
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ss.x += Math.cos(ss.angle) * ss.speed;
+                ss.y += Math.sin(ss.angle) * ss.speed;
+                ss.opacity -= 0.008;
+                if (ss.opacity <= 0 || ss.x > w + 100 || ss.y > h + 100) {
+                    shootingStars.splice(i, 1);
+                }
+            }
+
+            // Black hole (drawn after stars so it covers them)
+            drawBlackHole();
 
             if (mouseActive) drawCursorStar();
             drawSparkles();
@@ -531,6 +519,7 @@
 
         const titleEl = document.getElementById('alien-title');
         const taglineEl = document.getElementById('alien-tagline');
+
         titleEl.textContent = randomAlien(8);
         taglineEl.textContent = randomAlien(18);
 
