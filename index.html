@@ -148,7 +148,6 @@
 
         // ---- Hybrid title: decode glyphs INTO the real name, then settle ----
         const TITLE = 'tolsadus';
-        const TAGLINE = 'exploring the quantum void';
         const scrambleSet = alienChars + 'abcdefghijklmnopqrstuvwxyz';
         const titleEl = document.getElementById('title');
         const taglineEl = document.getElementById('tagline');
@@ -171,7 +170,17 @@
         }
 
         decodeInto(titleEl, TITLE, 2200);
-        setTimeout(() => decodeInto(taglineEl, TAGLINE, 2600), 700);
+
+        // Tagline: living alien glyphs (same vibe as the background), gently shifting
+        const TAGLINE_LEN = 22;
+        const taglineGlyphs = Array.from({ length: TAGLINE_LEN }, () => rnd(alienChars));
+        taglineEl.textContent = taglineGlyphs.join('');
+        setInterval(() => {
+            for (let i = 0; i < TAGLINE_LEN; i++) {
+                if (Math.random() < 0.08) taglineGlyphs[i] = rnd(alienChars);
+            }
+            taglineEl.textContent = taglineGlyphs.join('');
+        }, 600);
 
         // ---- Ambient glyphs: appear and disappear in place (no falling) ----
         const canvas = document.getElementById('glyphs');
